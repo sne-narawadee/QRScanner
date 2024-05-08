@@ -17,6 +17,8 @@ navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
     const video = document.getElementById('video');
     video.srcObject = stream;
     video.play();
+    // Call the scanQRCode function after the video stream has started
+    scanQRCode();
   })
   .catch(function(err) {
     console.error('Error accessing the camera: ', err);
@@ -44,16 +46,11 @@ function scanQRCode() {
   if (code) {
     // Open the decoded URL
     window.open(code.data, '_blank');
-  } else {
-    alert('ไม่พบ QR code ในภาพ');
   }
 
   // Repeat the scan
   requestAnimationFrame(scanQRCode);
 }
-
-// Start scanning QR code
-scanQRCode();
 </script>
 </body>
 </html>
