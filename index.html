@@ -46,6 +46,7 @@ function scanQRCode() {
   if (code) {
     // Open the decoded URL
     window.open(code.data, '_blank');
+    return; // เมื่อพบ QR code ให้จบฟังก์ชันทันที
   }
 
   // Repeat the scan
