@@ -43,7 +43,7 @@ function scanQRCode() {
 
   if (code) {
     // Open the decoded URL
-    window.location.href = code.data;
+    window.open(code.data, '_blank');
   } else {
     alert('ไม่พบ QR code ในภาพ');
   }
