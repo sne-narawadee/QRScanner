@@ -2,68 +2,58 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Code Scanner</title>
-
-<!-- Include the HTML5 QR Code library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-<!-- Style for layout -->
-<style>
-main {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-#reader {
-  width: 300px;
-  height: 300px;
-  margin-right: 20px;
-}
-#result {
-  font-size: 1.2rem;
-  text-align: center;
-}
-</style>
 </head>
-<body data-rsssl=1>
-
-<main>
-  <!-- Element to contain the QR code scanner -->
-  <div id="reader"></div>
-
-  <!-- Element to display the result after scanning -->
-  <div id="result"></div>
-</main>
-
+<body>
+<h1>QR Code Scanner</h1>
+<video id="video" width="100%" height="auto" autoplay></video>
+<canvas id="canvas" style="display:none;"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@2.0.1/build/jsQR.js"></script>
 <script>
-// Initialize the QR code scanner
-const scanner = new Html5QrcodeScanner('reader', { fps: 10 });
+// Access the device camera and stream to video element
+navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+  .then(function(stream) {
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+    video.play();
+  })
+  .catch(function(err) {
+    console.error('Error accessing the camera: ', err);
+  });
 
-// Render the scanner and define the success and error callback functions
-scanner.render(scanSuccess, scanError);
+// Function to scan QR code
+function scanQRCode() {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
 
-// Function to handle successful scan
-function scanSuccess(result) {
-  // Check if the scanned result is not empty
-  if (result && result.trim() !== '') {
-    // Open the scanned URL in the same window
-    window.open(decodeURIComponent(result), '_blank');
+  // Set canvas dimensions to match video element
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  // Draw video frame onto canvas
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Get image data from canvas
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+  // Use jsQR library to decode QR code
+  const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+  if (code) {
+    // Open the decoded URL
+    window.location.href = code.data;
   } else {
-    // Display error message if the scanned result is empty
-    document.getElementById('result').innerHTML = '<p>Error: Scanned QR code is empty.</p>';
+    alert('ไม่พบ QR code ในภาพ');
   }
+
+  // Repeat the scan
+  requestAnimationFrame(scanQRCode);
 }
 
-// Function to handle scan error
-function scanError(error) {
-  console.error('QR code scan error:', error);
-  // Display the error message
-  document.getElementById('result').innerHTML = `<p>Error scanning QR code: ${error}</p>`;
-}
+// Start scanning QR code
+scanQRCode();
 </script>
-
 </body>
 </html>
