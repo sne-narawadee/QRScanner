@@ -1,158 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner</title>
-    <!-- Include necessary libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.0.1/html5-qrcode.min.js"
-        integrity="sha512-JXdlXFkKGAhP2yUubNT7hXNjEtPrAJz1Gs7oztdP47KhqL5ux88uof5FnIm2D0Ud/TdqiAe1mM1179kJDy/HKA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css"
-        integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <style>
-        @import url(https://fonts.googleapis.com/css?family=Prompt);
-
-        body {
-            font-family: Prompt;
-        }
-
-        .color {
-            background-color: #a2a0a5;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
 </head>
+<body data-rsssl=1>
 
-<body>
-    <div class="container">
-        <div class="col-md-8 mx-auto">
-            <div class="bg-primary text-white mb-2 p-2 text-center">
-                <!-- Logo and Title -->
-                <img src="https://sv1.picz.in.th/images/2022/07/21/XSyp5g.png" width="100" height="120"
-                    class="d-inline-block align-bottom" style="margin-left: 15px;" />
-                <h2 class="py-2">ระบบสแกน QR-CODE50 V.2</h2>
-                <h5 style="word-break: break-all" class="form-label">
-                    <i class="fas fa-save"></i> ฟอร์มบันทึกข้อมูล
-                </h5>
-            </div>
-
-            <div class="col-md-12 mb-2" id="page1">
-                <!-- Device Selection and Scanner -->
-                <select id="deviceID" class="form-select"></select>
-                <div class="col-md-12 mb-2 text-center">
-                    <button id="scan" class="btn btn-warning col-md-12 col-12 mt-2 mb-2">เปิดกล้อง</button>
-                    <div style="width:100% ;" id="reader"></div>
-                </div>
-                <div class="col-md-12 mb-2">
-                    <!-- File Upload for QR Code -->
-                    <label><i class="fa-solid fa-qrcode"></i> เลือกภาพ QR Code ในเครื่อง</label>
-                    <input type="file" class="form-control" name="file" id="file">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Section -->
-    <script>
-        const html5QrCode = new Html5Qrcode("reader");
-        var resultArr = [];
-        var elm = document.getElementById("deviceID") //A1
-
-        // This method will trigger user permissions
-        Html5Qrcode.getCameras().then(devices => {
-            if (devices && devices.length) {
-                var cameraId = devices[0].id;
-                for (i = 0; i < devices.length; i++) {
-                    var option = document.createElement("option");
-                    option.value = devices[i].id;
-                    option.text = devices[i].label;
-                    elm.add(option);
-                }
-            }
-        }).catch(err => {
-            // handle err
-        });
-
-        const qrCodeSuccessCallback = message => {
-            html5QrCode.stop()
-                .then(ignore => {
-                    openLink(message);
-                }).catch(err => {
-                    // Stop failed, handle it.
-                });
-        }
-
-        // Function to open link
-        function openLink(url) {
-            window.open(url, '_blank');
-        }
-
-        $("#scan").on("click", function () {
-            if ($(this).html() == "เปิดกล้อง") {
-                $(this)
-                    .html("ปิดกล้อง")
-                    .removeClass("btn-warning")
-                    .addClass("btn-danger");
-                document.getElementById('reader').style.display = "block";
-                html5QrCode.start({
-                    deviceId: {
-                        exact: elm.value
-                    }
-                }, config, qrCodeSuccessCallback);
-            } else {
-                $(this)
-                    .html("เปิดกล้อง")
-                    .removeClass("btn-danger")
-                    .addClass("btn-warning");
-                html5QrCode.stop();
-            }
-        });
-
-        const fileinput = document.getElementById('file');
-        fileinput.addEventListener('change', e => {
-            if (e.target.files.length == 0) {
-                return;
-            }
-
-            if ($("#scan").html() == "ปิดกล้อง") {
-                $("#scan")
-                    .html("เปิดกล้อง")
-                    .removeClass("btn-danger")
-                    .addClass("btn-warning");
-                document.getElementById('reader').style.display = "block";
-            }
-
-            html5QrCode.stop();
-            const imageFile = e.target.files[0];
-            html5QrCode.scanFile(imageFile, true)
-                .then(message => {
-                    scanresult(message, "F");
-                })
-                .catch(err => {
-                    console.log(`Error scanning file. Reason: ${err}`);
-                });
-            html5QrCode.clear();
-            document.getElementById('reader').style.display = "block";
-        });
-    </script>
-
-    <!-- Include SweetAlert2 library -->
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- JavaScript Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
-        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
-        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
-        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+main {
+display: flex;
+justify-content: center;
+align-items: center;
+}
+#reader {
+width: 600px;
+}
+#result {
+text-align: center;
+font-size: 1.5rem;
+}
+</style>
+<main>
+<div id="reader"></div>
+<div id="result"></div>
+</main>
+<script>
+const scanner = new Html5QrcodeScanner('reader', {
+qrbox: {
+width: 250,
+height: 250,
+},
+fps: 20,
+});
+scanner.render(success, error);
+function success(result) {
+document.getElementById('result').innerHTML = `
+<h2>Success!</h2>
+<p><a href="${result}">${result}</a></p>
+`;
+scanner.clear();
+document.getElementById('reader').remove();
+}
+function error(err) {
+console.error(err);
+}
+</script>
+  
 </body>
-
 </html>
