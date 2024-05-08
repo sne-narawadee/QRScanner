@@ -1,54 +1,69 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Document</title>
+<title>QR Code Scanner</title>
+
+<!-- Include the HTML5 QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- Style for layout -->
+<style>
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+#reader {
+  width: 300px;
+  height: 300px;
+  margin-right: 20px;
+}
+#result {
+  font-size: 1.2rem;
+  text-align: center;
+}
+</style>
 </head>
 <body data-rsssl=1>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js" integrity="sha512-k/KAe4Yff9EUdYI5/IAHlwUswqeipP+Cp5qnrsUjTPCgl51La2/JhyyjNciztD7mWNKLSXci48m7cctATKfLlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<style>
-main {
-display: flex;
-justify-content: center;
-align-items: center;
-}
-#reader {
-width: 600px;
-}
-#result {
-text-align: center;
-font-size: 1.5rem;
-}
-</style>
 <main>
-<div id="reader"></div>
-<div id="result"></div>
+  <!-- Element to contain the QR code scanner -->
+  <div id="reader"></div>
+
+  <!-- Element to display the result after scanning -->
+  <div id="result"></div>
 </main>
+
 <script>
-const scanner = new Html5QrcodeScanner('reader', {
-qrbox: {
-width: 250,
-height: 250,
-},
-fps: 20,
-});
-scanner.render(success, error);
-function success(result) {
-document.getElementById('result').innerHTML = `
-<h2>Success!</h2>
-<p><a href="${result}">${result}</a></p>
-`;
-scanner.clear();
-document.getElementById('reader').remove();
+// Initialize the QR code scanner
+const scanner = new Html5QrcodeScanner('reader', { fps: 10 });
+
+// Render the scanner and define the success and error callback functions
+scanner.render(scanSuccess, scanError);
+
+// Function to handle successful scan
+function scanSuccess(result) {
+  // Check if the scanned result is not empty
+  if (result && result.trim() !== '') {
+    // Open the scanned URL in the same window
+    window.open(decodeURIComponent(result), '_blank');
+  } else {
+    // Display error message if the scanned result is empty
+    document.getElementById('result').innerHTML = '<p>Error: Scanned QR code is empty.</p>';
+  }
 }
-function error(err) {
-console.error(err);
+
+// Function to handle scan error
+function scanError(error) {
+  console.error('QR code scan error:', error);
+  // Display the error message
+  document.getElementById('result').innerHTML = `<p>Error scanning QR code: ${error}</p>`;
 }
 </script>
-  
+
 </body>
 </html>
