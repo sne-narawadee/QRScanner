@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>QR Code Scanner - Rear Camera</title>
+    <title>QR Code Scanner</title>
     <script src="https://cdn.jsdelivr.net/npm/jsQR@1.3.1/dist/jsQR.min.js"></script>
 </head>
 <body>
     <h1>Scan QR Code</h1>
-    <p id="status">Awaiting camera access...</p>
+    <p id="status">Waiting for camera access...</p>
     <video id="preview" autoplay style="width: 100%; display: none;"></video>
     <canvas id="canvas" style="display: none;"></canvas>
 
@@ -35,6 +35,11 @@
         }
 
         function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                status.textContent = 'Camera access is not supported on this device or browser.';
+                return;
+            }
+
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(function(stream) {
                     video.srcObject = stream;
@@ -44,7 +49,7 @@
                 })
                 .catch(function(error) {
                     console.error('Error accessing camera:', error);
-                    status.textContent = 'Camera access denied. Please allow camera access to scan QR code.'; // ข้อความเมื่อปฏิเสธ
+                    status.textContent = `Camera access denied. Error: ${error.message}`;
                 });
         }
 
