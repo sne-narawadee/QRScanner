@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.0.1/html5-qrcode.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <style>
-    @import url(https://fonts.googleapis.com/css?family=Prompt);
     body {
-      font-family: Prompt;
+      font-family: Arial, sans-serif;
     }
     #reader {
       width: 100%;
@@ -23,7 +19,7 @@
       top: 0;
       left: 0;
       right: 0;
-      bottom: 60px; /* Adjusted camera position */
+      bottom: 0;
       z-index: 1000;
       background: white;
     }
@@ -31,103 +27,103 @@
 </head>
 <body>
 
-  <div class="container">
-    <div class="col-md-8 mx-auto">
-      <div class="bg-primary text-white mb-2 p-2 text-center">
-        <img src="https://sv1.picz.in.th/images/2022/07/21/XSyp5g.png" width="100" height="120" class="d-inline-block align-bottom"/>
-        <h2 class="py-2">ระบบสแกน QR-CODE V.2</h2>
-        <h5 class="form-label"><i class="fas fa-save"></i> ฟอร์มบันทึกข้อมูล</h5>
-      </div>
+<div class="container">
+  <div class="col-md-8 mx-auto">
+    <div class="bg-primary text-white mb-2 p-2 text-center">
+      <h2>ระบบสแกน QR-CODE</h2>
+    </div>
 
-      <div class="col-md-12 mb-2" id="main-content">
-        <select id="deviceID" class="form-select"></select>
-        <div id="reader">
-          <div class="text-center">
-            <button id="scan" class="btn btn-warning col-md-12 col-12 mt-2 mb-2">เปิดกล้อง</button>
-          </div>
-        </div>
-      </div>
+    <div id="reader-container">
+      <div id="reader-fullscreen" class="fullscreen" style="display: none;"></div>
+    </div>
 
-      <div id="camera-container" class="fullscreen" style="display: none;">
-        <div id="reader-fullscreen"></div>
-      </div>
+    <div class="text-center mt-3">
+      <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
+      <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const html5QrCode = new Html5Qrcode("reader-fullscreen");
-    const deviceSelect = document.getElementById("deviceID");
+<script>
+  const html5QrCode = new Html5Qrcode("reader-fullscreen");
+  const deviceSelect = document.getElementById("deviceSelect");
+  let isCameraRunning = false;
 
-    // Load camera devices
+  // Function to get and list all camera devices
+  const listCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
-        if (devices && devices.length > 0) {
-          devices.forEach(device => {
-            const option = document.createElement("option");
-            option.value = device.id;
-            option.text = device.label;
-            deviceSelect.appendChild(option);
-          });
-        } else {
+        if (devices.length === 0) {
           console.error("ไม่พบอุปกรณ์กล้อง");
+          return;
         }
+
+        deviceSelect.innerHTML = ""; // Clear existing options
+        devices.forEach(device => {
+          const option = document.createElement("option");
+          option.value = device.id;
+          option.textContent = device.label;
+          deviceSelect.appendChild(option);
+        });
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการค้นหากล้อง:", err);
       });
+  };
 
-    // QR code scanning configuration
-    const qrCodeSuccessCallback = (decodedText) => {
+  listCameras(); // Initial call to list cameras
+
+  const qrCodeSuccessCallback = (decodedText) => {
+    html5QrCode.stop()
+      .then(() => {
+        console.log("QR code สแกนสำเร็จ:", decodedText);
+        window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
+        $("#reader-fullscreen").hide(); // Hide the fullscreen
+        $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+        isCameraRunning = false;
+        listCameras(); // Refresh the camera list
+      })
+      .catch(err => {
+        console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
+      });
+  };
+
+  const config = {
+    fps: 10, // frames per second
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1,
+    facingMode: "environment" // Default to back camera
+  };
+
+  $("#toggleCamera").on("click", function() {
+    if (!isCameraRunning) {
+      $("#reader-fullscreen").show(); // Show the fullscreen camera
+      $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
+
+      const selectedDevice = deviceSelect.value;
+      html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
+        .then(() => {
+          isCameraRunning = true;
+        })
+        .catch(err => {
+          console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
+        });
+    } else {
+      $("#reader-fullscreen").hide(); // Hide the fullscreen
+      $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+
       html5QrCode.stop()
         .then(() => {
-          console.log("QR code สแกนสำเร็จ:", decodedText);
-          window.open(decodedText, "_blank");
-          $("#camera-container").hide();
-          $("#scan").html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+          isCameraRunning = false;
         })
         .catch(err => {
           console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
         });
-    };
+    }
+  });
+</script>
 
-    const config = {
-      fps: 10, // frames per second
-      qrbox: { width: 250, height: 250 }, // QR box size
-      aspectRatio: 1, // aspect ratio
-      facingMode: "environment", // default to back camera
-    };
-
-    let isCameraRunning = false;
-
-    $("#scan").on("click", function() {
-      if (!isCameraRunning) {
-        $("#camera-container").show();
-        $(this).html("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
-        const selectedDevice = deviceSelect.value;
-        html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
-          .then(() => {
-            isCameraRunning = true;
-          })
-          .catch(err => {
-            console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
-          });
-      } else {
-        $("#camera-container").hide();
-        $(this).html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
-        html5QrCode.stop()
-          .then(() => {
-            isCameraRunning = false;
-          })
-          .catch(err => {
-            console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
-          });
-      }
-    });
-
-  </script>
-
-  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
