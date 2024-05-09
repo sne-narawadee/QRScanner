@@ -29,13 +29,14 @@
       <h2>ระบบสแกน QR-CODE</h2>
     </div>
 
-    <div id="camera-container" class="fullscreen" style="display: none;">
-      <div id="reader-fullscreen"></div>
-    </div>
-
     <div class="text-center mt-3">
       <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
-      <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
+      <button id="startCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
+      <button id="stopCamera" class="btn btn-danger mt-3" style="display: none;">ปิดกล้อง</button> <!-- Hidden by default -->
+    </div>
+
+    <div id="camera-container" class="fullscreen" style="display: none;">
+      <div id="reader-fullscreen"></div>
     </div>
   </div>
 </div>
@@ -45,7 +46,6 @@
   const deviceSelect = document.getElementById("deviceSelect");
   let isCameraRunning = false;
 
-  // Function to list only back cameras
   const listBackCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
@@ -79,11 +79,12 @@
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-        window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
+        window.open(decodedText, "_blank"); // Open in a new tab
         $("#camera-container").hide(); // Hide the fullscreen
-        $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
-        isCameraRunning = false;
+        $("#startCamera").show();
+        $("#stopCamera").hide(); // Hide the stop button
         listBackCameras(); // Refresh the list of back cameras
+        isCameraRunning = false;
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -96,12 +97,13 @@
     facingMode: "environment" // Force to use back camera
   };
 
-  $("#toggleCamera").on("click", function() {
+  $("#startCamera").on("click", function() {
     if (!isCameraRunning) {
-      $("#camera-container").show(); // Show the fullscreen
-      $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
+      $("#camera-container").show(); // Show the fullscreen camera
+      $(this).hide(); // Hide the start button
+      $("#stopCamera").show(); // Show the stop button
 
-      const selectedDevice = deviceSelect.value; // Use the selected back camera
+      const selectedDevice = deviceSelect.value;
       html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
         .then(() => {
           isCameraRunning = true;
@@ -109,9 +111,14 @@
         .catch(err => {
           console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
         });
-    } else {
-      $("#camera-container").hide(); // Hide the fullscreen
-      $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+    }
+  });
+
+  $("#stopCamera").on("click", function() {
+    if (isCameraRunning) {
+      $("#camera-container").hide(); // Hide the fullscreen camera
+      $("#startCamera").show(); // Show the start button
+      $(this).hide(); // Hide the stop button
 
       html5QrCode.stop()
         .then(() => {
