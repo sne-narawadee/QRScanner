@@ -49,6 +49,7 @@
   const deviceSelect = document.getElementById("deviceSelect");
   let isCameraRunning = false;
 
+  // Function to get and list all camera devices
   const listCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
@@ -57,7 +58,7 @@
           return;
         }
 
-        deviceSelect.innerHTML = ""; 
+        deviceSelect.innerHTML = ""; // Clear existing options
         devices.forEach(device => {
           const option = document.createElement("option");
           option.value = device.id;
@@ -70,16 +71,17 @@
       });
   };
 
-  listCameras(); 
+  listCameras(); // Initial call to list cameras
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-        window.open(decodedText, "_blank"); 
-        $("#reader-fullscreen").hide(); 
+        window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
+        $("#reader-fullscreen").hide(); // Hide the fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
+        listCameras(); // Refresh the camera list
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -90,16 +92,16 @@
     fps: 10, // frames per second
     qrbox: { width: 250, height: 250 },
     aspectRatio: 1,
-    facingMode: "environment" // Always use the back camera
+    facingMode: "environment" // Default to back camera
   };
 
   $("#toggleCamera").on("click", function() {
     if (!isCameraRunning) {
-      $("#reader-fullscreen").show(); 
+      $("#reader-fullscreen").show(); // Show the fullscreen camera
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
       const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ deviceId: { exact: selectedDevice }, facingMode: "environment" }, config, qrCodeSuccessCallback)
+      html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
         .then(() => {
           isCameraRunning = true;
         })
@@ -107,7 +109,7 @@
           console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
         });
     } else {
-      $("#reader-fullscreen").hide(); 
+      $("#reader-fullscreen").hide(); // Hide the fullscreen
       $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
 
       html5QrCode.stop()
