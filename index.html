@@ -1,57 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QR Code Scanner</title>
+    <meta charset="UTF-8">
+    <title>QR Code Reader</title>
+    <style>
+        #video {
+            width: 100%;
+            height: auto;
+            border: 1px solid black;
+        }
+        #output {
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: green;
+        }
+    </style>
 </head>
 <body>
-<h1>QR Code Scanner</h1>
-<video id="video" width="100%" height="auto" autoplay></video>
-<canvas id="canvas" style="display:none;"></canvas>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@2.0.1/build/jsQR.js"></script>
-<script>
-// Access the device camera and stream to video element
-navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-  .then(function(stream) {
-    const video = document.getElementById('video');
-    video.srcObject = stream;
-    video.play();
-    // Call the scanQRCode function after the video stream has started
-    scanQRCode();
-  })
-  .catch(function(err) {
-    console.error('Error accessing the camera: ', err);
-  });
-
-// Function to scan QR code
-function scanQRCode() {
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const context = canvas.getContext('2d');
-
-  // Set canvas dimensions to match video element
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  // Draw video frame onto canvas
-  context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  // Get image data from canvas
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-  // Use jsQR library to decode QR code
-  const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-  if (code) {
-    // Open the decoded URL
-    window.open(code.data, '_blank');
-    return; // เมื่อพบ QR code ให้จบฟังก์ชันทันที
-  }
-
-  // Repeat the scan
-  requestAnimationFrame(scanQRCode);
-}
-</script>
+    <h1>QR Code Reader</h1>
+    <video id="video" autoplay playsinline></video>
+    <div id="output">Scanning...</div>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
