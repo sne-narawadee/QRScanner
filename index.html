@@ -38,18 +38,16 @@
     </div>
 
     <div class="text-center mt-3">
-      <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
-      <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
+      <button id="toggleCamera" class="btn btn-warning">เปิดกล้อง</button>
     </div>
   </div>
 </div>
 
 <script>
   const html5QrCode = new Html5Qrcode("reader-fullscreen");
-  const deviceSelect = document.getElementById("deviceSelect");
   let isCameraRunning = false;
+  let cameraId = null;
 
-  // Function to get and list all camera devices
   const listCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
@@ -58,13 +56,8 @@
           return;
         }
 
-        deviceSelect.innerHTML = ""; // Clear existing options
-        devices.forEach(device => {
-          const option = document.createElement("option");
-          option.value = device.id;
-          option.textContent = device.label;
-          deviceSelect.appendChild(option);
-        });
+        // By default, choose the first available device (back camera)
+        cameraId = devices[0].id;
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการค้นหากล้อง:", err);
@@ -91,7 +84,7 @@
     fps: 10, // frames per second
     qrbox: { width: 250, height: 250 },
     aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
+    facingMode: "environment" // Use back camera
   };
 
   $("#toggleCamera").on("click", function() {
@@ -99,8 +92,7 @@
       $("#reader-fullscreen").show(); // Show the fullscreen camera
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
-      const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback) // Start with back camera by default
+      html5QrCode.start({ deviceId: { exact: cameraId } }, config, qrCodeSuccessCallback) // Start with default back camera
         .then(() => {
           isCameraRunning = true;
         })
