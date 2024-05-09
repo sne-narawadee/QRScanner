@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Scan QR Code</title>
-    <script src="https://unpkg.com/html5-qrcode@latest"></script> <!-- Library สำหรับสแกน QR Code -->
+    <script src="https://unpkg.com/html5-qrcode@latest"></script>
 </head>
 <body>
-    <h1>Scan QR Code to Open Link</h1>
+    <h1>Scan QR Code to Open Google Drive Link</h1>
     <div id="qr-reader" style="width: 300px;"></div>
     <div id="qr-reader-results"></div>
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
+            // เมื่อสแกน QR Code สำเร็จ
             console.log(`ผลการสแกน: ${decodedText}`);
             document.getElementById('qr-reader-results').innerHTML = `Scanned: ${decodedText}`;
 
-            // เปิดลิงก์ในแท็บใหม่
+            // เปิดลิงก์ Google Drive
             window.open(decodedText, '_blank');
         }
 
