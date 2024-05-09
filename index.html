@@ -20,6 +20,9 @@
     body {
       font-family: Prompt;
     }
+    .color {
+      background-color: #a2a0a5;
+    }
     #reader {
       width: 100%;
       height: 250px;
@@ -29,7 +32,7 @@
       top: 0;
       left: 0;
       right: 0;
-      bottom: 60px;
+      bottom: 60px; /* เผื่อพื้นที่สำหรับปุ่มเปิด/ปิด */
       z-index: 1000;
       background: white;
     }
@@ -42,22 +45,23 @@
       <div class="bg-primary text-white mb-2 p-2 text-center">
         <img src="https://sv1.picz.in.th/images/2022/07/21/XSyp5g.png" width="100" height="120"
           class="d-inline-block align-bottom" style="margin-left: 15px;"/>
-        <h2 class="py-2">ระบบสแกน QR-CODE V.2</h2>
+        <h2 class="py-2">ระบบสแกน QR-CODE50 V.2</h2>
         <h5 style="word-break: break-all" class="form-label">
           <i class="fas fa-save"></i> ฟอร์มบันทึกข้อมูล
         </h5>
       </div>
 
-      <div class="col-md-12 mb-2" id="main-content">
+      <div class="col-md-12 mb-2" id="main-content"> <!-- ส่วนที่จะแสดงเมื่อปิดกล้อง -->
         <select id="deviceID" class="form-select"></select>
-        <div id="reader">
-          <div class="text-center">
+
+        <div id="reader"> <!-- พื้นที่สำหรับกล้อง -->
+          <div class="text-center"> <!-- ปุ่มสำหรับเปิด/ปิดกล้อง -->
             <button id="scan" class="btn btn-warning col-md-12 col-12 mt-2 mb-2">เปิดกล้อง</button>
           </div>
         </div>
       </div>
 
-      <div id="camera-container" class="fullscreen" style="display: none;">
+      <div id="camera-container" class="fullscreen" style="display: none;"> <!-- กล้องเต็มหน้าจอ -->
         <div id="reader-fullscreen"></div>
         <button id="close-camera" class="btn btn-danger col-md-12 col-12" style="position: absolute; bottom: 10px;">ปิดกล้อง</button>
       </div>
@@ -70,7 +74,7 @@
 
     Html5Qrcode.getCameras().then(devices => {
       if (devices && devices.length) {
-        devices = devices.filter(device => device.label.toLowerCase().includes("back")); // กล้องหลัง
+        devices = devices.filter(device => device.label.toLowerCase().includes("back")); // เฉพาะกล้องหลัง
         if (devices.length > 0) {
           devices.forEach(device => {
             const option = document.createElement("option");
@@ -78,6 +82,8 @@
             option.text = device.label;
             elm.add(option);
           });
+        } else {
+          console.error("ไม่พบกล้องหลัง");
         }
       }
     }).catch(err => {
@@ -87,42 +93,42 @@
     const qrCodeSuccessCallback = (decodedText, decodedResult) => {
       html5QrCode.stop()
         .then(() => {
-          console.log("QR code สแกนสำเร็จ:", decodedText);
-          window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
-          $("#camera-container").hide(); // ปิดกล้องอัตโนมัติ
-          $("#scan").html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+          console.log("ข้อความที่สแกน:", decodedText);
+          window.open(decodedText, "_blank"); // เปิดลิงก์ในแท็บใหม่
         })
         .catch(err => {
-          console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
+          console.error("เกิดข้อผิดพลาดในการหยุดสแกน QR:", err);
         });
     };
 
     const config = {
-      fps: 10,
+      fps: 15,
       qrbox: { width: 250, height: 250 },
-      aspectRatio: 1,
-      facingMode: "environment", // กล้องหลัง
+      aspectRatio: 1, // ทำให้โค้ดคงรูปแบบสี่เหลี่ยมจัตุรัส
+      facingMode: "environment", // ให้แน่ใจว่ากล้องหลังถูกเลือก
     };
 
-    let cameraRunning = false; 
+    let cameraRunning = false; // ตรวจสอบสถานะของกล้อง
 
     $("#scan").on("click", function() {
-      if (!cameraRunning) {
-        $("#camera-container").show();
+      const isStarting = !cameraRunning;
+
+      if (isStarting) {
         $(this).html("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
+        $("#camera-container").show();
         html5QrCode.start({ deviceId: { exact: elm.value } }, config, qrCodeSuccessCallback)
           .then(() => {
-            cameraRunning = true; // กล้องกำลังทำงาน
+            cameraRunning = true; // ตั้งค่ากล้องให้เป็นสถานะเปิด
           })
           .catch(err => {
             console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
           });
       } else {
-        $("#camera-container").hide();
         $(this).html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+        $("#camera-container").hide();
         html5QrCode.stop()
           .then(() => {
-            cameraRunning = false; // กล้องหยุดทำงาน
+            cameraRunning = false; // ตั้งค่ากล้องให้เป็นสถานะปิด
           })
           .catch(err => {
             console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -131,11 +137,11 @@
     });
 
     $("#close-camera").on("click", function() {
-      $("#camera-container").hide();
       $("#scan").html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+      $("#camera-container").hide();
       html5QrCode.stop()
         .then(() => {
-          cameraRunning = false;
+          cameraRunning = false; // ตั้งค่ากล้องให้เป็นสถานะปิด
         })
         .catch(err => {
           console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
