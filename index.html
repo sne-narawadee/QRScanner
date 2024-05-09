@@ -10,10 +10,6 @@
     body {
       font-family: Arial, sans-serif;
     }
-    #reader {
-      width: 100%;
-      height: 250px;
-    }
     .fullscreen {
       position: fixed;
       top: 0;
@@ -33,8 +29,8 @@
       <h2>ระบบสแกน QR-CODE</h2>
     </div>
 
-    <div id="reader-container">
-      <div id="reader-fullscreen" class="fullscreen" style="display: none;"></div>
+    <div id="camera-container" class="fullscreen" style="display: none;">
+      <div id="reader-fullscreen"></div>
     </div>
 
     <div class="text-center mt-3">
@@ -49,8 +45,8 @@
   const deviceSelect = document.getElementById("deviceSelect");
   let isCameraRunning = false;
 
-  // Function to get and list all camera devices
-  const listCameras = () => {
+  // Function to list only back cameras
+  const listBackCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
         if (devices.length === 0) {
@@ -58,30 +54,36 @@
           return;
         }
 
+        const backCameras = devices.filter(device => device.label.toLowerCase().includes("back"));
         deviceSelect.innerHTML = ""; // Clear existing options
-        devices.forEach(device => {
-          const option = document.createElement("option");
-          option.value = device.id;
-          option.textContent = device.label;
-          deviceSelect.appendChild(option);
-        });
+
+        if (backCameras.length > 0) {
+          backCameras.forEach(device => {
+            const option = document.createElement("option");
+            option.value = device.id;
+            option.textContent = device.label;
+            deviceSelect.appendChild(option);
+          });
+        } else {
+          console.error("ไม่พบกล้องด้านหลัง");
+        }
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการค้นหากล้อง:", err);
       });
   };
 
-  listCameras(); // Initial call to list cameras
+  listBackCameras(); // Initial call to list only back cameras
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
         window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
-        $("#reader-fullscreen").hide(); // Hide the fullscreen
+        $("#camera-container").hide(); // Hide the fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
-        listCameras(); // Refresh the camera list
+        listBackCameras(); // Refresh the list of back cameras
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -89,18 +91,17 @@
   };
 
   const config = {
-    fps: 10, // frames per second
-    qrbox: { width: 250, height: 250 },
+    fps: 10, // Frames per second
     aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
+    facingMode: "environment" // Force to use back camera
   };
 
   $("#toggleCamera").on("click", function() {
     if (!isCameraRunning) {
-      $("#reader-fullscreen").show(); // Show the fullscreen camera
+      $("#camera-container").show(); // Show the fullscreen
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
-      const selectedDevice = deviceSelect.value;
+      const selectedDevice = deviceSelect.value; // Use the selected back camera
       html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
         .then(() => {
           isCameraRunning = true;
@@ -109,7 +110,7 @@
           console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
         });
     } else {
-      $("#reader-fullscreen").hide(); // Hide the fullscreen
+      $("#camera-container").hide(); // Hide the fullscreen
       $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
 
       html5QrCode.stop()
@@ -121,6 +122,7 @@
         });
     }
   });
+
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
