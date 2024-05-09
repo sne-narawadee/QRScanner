@@ -32,7 +32,7 @@
     <div class="text-center mt-3">
       <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
       <button id="startCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
-      <button id="stopCamera" class="btn btn-danger mt-3" style="display: none;">ปิดกล้อง</button> <!-- Hidden by default -->
+      <button id="stopCamera" class="btn btn-danger mt-3" style="display: none;">ปิดกล้อง</button>
     </div>
 
     <div id="camera-container" class="fullscreen" style="display: none;">
@@ -73,7 +73,7 @@
       });
   };
 
-  listBackCameras(); // Initial call to list only back cameras
+  listBackCameras(); // List only back cameras initially
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
@@ -81,7 +81,7 @@
         console.log("QR code สแกนสำเร็จ:", decodedText);
         window.open(decodedText, "_blank"); // Open in a new tab
         $("#camera-container").hide(); // Hide the fullscreen
-        $("#startCamera").show();
+        $("#startCamera").show(); // Show the start button
         $("#stopCamera").hide(); // Hide the stop button
         listBackCameras(); // Refresh the list of back cameras
         isCameraRunning = false;
@@ -94,7 +94,7 @@
   const config = {
     fps: 10, // Frames per second
     aspectRatio: 1,
-    facingMode: "environment" // Force to use back camera
+    facingMode: "environment" // Use back camera
   };
 
   $("#startCamera").on("click", function() {
@@ -103,7 +103,7 @@
       $(this).hide(); // Hide the start button
       $("#stopCamera").show(); // Show the stop button
 
-      const selectedDevice = deviceSelect.value;
+      const selectedDevice = deviceSelect.value; // Use the selected back camera
       html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
         .then(() => {
           isCameraRunning = true;
