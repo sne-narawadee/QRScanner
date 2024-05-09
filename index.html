@@ -2,25 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!--<title>QR Code Reader</title>-->
-    <style>
-        #video {
-            width: 100%;
-            height: auto;
-            border: 1px solid black;
-        }
-        #output {
-            margin-top: 10px;
-            font-size: 1.2em;
-            color: green;
-        }
-    </style>
+    <title>Scan QR Code</title>
+    <script src="https://unpkg.com/html5-qrcode@latest"></script>
 </head>
 <body>
-    <!--<h1>QR Code Reader</h1>-->
-    <video id="video" autoplay playsinline></video>
-    <div id="output">Scanning...</div>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
-    <script src="app.js"></script>
+    <h1>Scan QR Code to Open Link</h1>
+    <div id="qr-reader" style="width: 300px;"></div>
+    <div id="qr-reader-results"></div>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // Action to take when QR Code is scanned
+            console.log(`Scan result: ${decodedText}`);
+            document.getElementById('qr-reader-results').innerHTML = `Scanned: ${decodedText}`;
+
+            // Open the scanned link
+            window.location.href = decodedText;
+        }
+
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            "qr-reader", { fps: 10, qrbox: 250 });
+
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
 </body>
 </html>
