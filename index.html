@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Scan QR Code</title>
-    <script src="https://unpkg.com/html5-qrcode@latest"></script> <!-- QR Code scanner library -->
+    <script src="https://unpkg.com/html5-qrcode@latest"></script> <!-- QR Code scanning library -->
 </head>
 <body>
     <h1>Scan QR Code to Open Link</h1>
     <div id="qr-reader" style="width: 300px;"></div>
-    <div id="qr-reader-results"></div>
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Scanned: ${decodedText}`);
+            // เมื่อลิงก์ถูกสแกนสำเร็จ
+            console.log(`ผลการสแกน: ${decodedText}`);
 
-            // เปิดลิงก์ในแท็บเดียวกัน
-            window.location.href = decodedText; // หากเป็นแอปที่เปิดลิงก์ QR code ลิงก์นี้จะเปิดในเบราว์เซอร์เริ่มต้น
+            // เปลี่ยนเส้นทางไปยังลิงก์ที่สแกนได้
+            window.location.href = decodedText; // เปลี่ยนหน้าเว็บไปยังลิงก์นั้น
         }
 
+        // เริ่มการสแกน QR Code
         var html5QrcodeScanner = new Html5QrcodeScanner(
             "qr-reader", { fps: 10, qrbox: 250 });
 
