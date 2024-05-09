@@ -46,25 +46,6 @@
 <script>
   const html5QrCode = new Html5Qrcode("reader-fullscreen");
   let isCameraRunning = false;
-  let cameraId = null;
-
-  const listCameras = () => {
-    Html5Qrcode.getCameras()
-      .then(devices => {
-        if (devices.length === 0) {
-          console.error("ไม่พบอุปกรณ์กล้อง");
-          return;
-        }
-
-        // By default, choose the first available device (back camera)
-        cameraId = devices[0].id;
-      })
-      .catch(err => {
-        console.error("เกิดข้อผิดพลาดในการค้นหากล้อง:", err);
-      });
-  };
-
-  listCameras(); // Initial call to list cameras
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
@@ -84,7 +65,7 @@
     fps: 10, // frames per second
     qrbox: { width: 250, height: 250 },
     aspectRatio: 1,
-    facingMode: "environment" // Use back camera
+    facingMode: "environment" // Default to back camera
   };
 
   $("#toggleCamera").on("click", function() {
@@ -92,7 +73,7 @@
       $("#reader-fullscreen").show(); // Show the fullscreen camera
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
-      html5QrCode.start({ deviceId: { exact: cameraId } }, config, qrCodeSuccessCallback) // Start with default back camera
+      html5QrCode.start(config, qrCodeSuccessCallback) // Start with the back camera
         .then(() => {
           isCameraRunning = true;
         })
