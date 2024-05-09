@@ -11,14 +11,12 @@
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            // เมื่อลิงก์ถูกสแกนสำเร็จ
-            console.log(`ผลการสแกน: ${decodedText}`);
+            console.log(`Scanned: ${decodedText}`);
 
             // เปลี่ยนเส้นทางไปยังลิงก์ที่สแกนได้
-            window.location.href = decodedText; // เปลี่ยนหน้าเว็บไปยังลิงก์นั้น
+            window.location.href = decodedText; // เปลี่ยนเส้นทางไปยังลิงก์ที่สแกนได้
         }
 
-        // เริ่มการสแกน QR Code
         var html5QrcodeScanner = new Html5QrcodeScanner(
             "qr-reader", { fps: 10, qrbox: 250 });
 
