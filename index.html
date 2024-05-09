@@ -24,7 +24,6 @@
       background-color: #a2a0a5;
     }
     #reader {
-      width: 100%;
       height: 250px;
     }
     .fullscreen {
@@ -35,6 +34,12 @@
       bottom: 60px; /* เผื่อพื้นที่สำหรับปุ่มเปิด/ปิด */
       z-index: 1000;
       background: white;
+      padding-bottom: 60px;
+    }
+    #web-content {
+      border: 1px solid #ccc;
+      height: calc(100% - 250px); /* พื้นที่สำหรับแสดงเว็บไซต์ */
+      overflow: auto;
     }
   </style>
 </head>
@@ -51,19 +56,13 @@
         </h5>
       </div>
 
-      <div class="col-md-12 mb-2" id="main-content"> <!-- ส่วนที่จะแสดงเมื่อปิดกล้อง -->
-        <select id="deviceID" class="form-select"></select>
-
-        <div id="reader"> <!-- พื้นที่สำหรับกล้อง -->
-          <div class="text-center"> <!-- ปุ่มสำหรับเปิด/ปิดกล้อง -->
-            <button id="scan" class="btn btn-warning col-md-12 col-12 mt-2 mb-2">เปิดกล้อง</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="camera-container" class="fullscreen" style="display: none;"> <!-- กล้องเต็มหน้าจอ -->
+      <div class="fullscreen" id="camera-container"> <!-- กล้องเต็มหน้าจอ -->
         <div id="reader-fullscreen"></div>
-        <button id="close-camera" class="btn btn-danger col-md-12 col-12" style="position: absolute; bottom: 10px;">ปิดกล้อง</button>
+        <iframe id="web-content" src="" style="width: 100%;"></iframe> <!-- บล็อกสำหรับแสดงเว็บไซต์ -->
+        <div class="text-center">
+          <button id="scan" class="btn btn-warning col-md-12 col-12 mt-2">เปิดกล้อง</button>
+          <button id="close-camera" class="btn btn-danger col-md-12 col-12 mt-2">ปิดกล้อง</button>
+        </div>
       </div>
     </div>
   </div>
@@ -75,7 +74,7 @@
     Html5Qrcode.getCameras().then(devices => {
       if (devices && devices.length) {
         devices = devices.filter(device => device.label.toLowerCase().includes("back")); // เฉพาะกล้องหลัง
-        if (devices.length > 0) {
+        if (devicesยง > 0) {
           devices.forEach(device => {
             const option = document.createElement("option");
             option.value = device.id;
@@ -90,43 +89,36 @@
       console.error("Error getting cameras:", err);
     });
 
-    const qrCodeSuccessCallback = message => {
-      html5QrCode.stop()
-        .then(() => {
-          console.log("Scanned message:", message);
-          window.open(message, "_blank"); // เปิดลิงก์ในแท็บใหม่
-        })
-        .catch(err => {
-          console.error("Error stopping QR code scanner:", err);
-        });
-    };
-
     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
+    const qrCodeSuccessCallback = message => {
+      const iframe = document.getElementById("web-content");
+      iframe.src = message; // แสดงเว็บไซต์ที่สแกน
+    };
+
     $("#scan").on("click", function() {
-      const cameraContainer = $("#camera-container");
       const isStarting = $(this).html() === "เปิดกล้อง";
       if (isStarting) {
         $(this).html("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
-        cameraContainer.show();
         html5QrCode.start({ deviceId: { exact: elm.value } }, config, qrCodeSuccessCallback);
       } else {
         $(this).html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
-        cameraContainer.hide();
         html5QrCode.stop();
+        document.getElementById("web-content").src = ""; // ล้างเนื้อหาเมื่อปิดกล้อง
       }
     });
 
     $("#close-camera").on("click", function() {
       $("#scan").html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
-      $("#camera-container").hide();
       html5QrCode.stop();
+      document.getElementById("web-content").src = ""; // ล้างเนื้อหาเมื่อปิดกล้อง
     });
   </script>
 
   <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- JavaScript Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+    integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
     integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 </body>
