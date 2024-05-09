@@ -6,18 +6,18 @@
     <script src="https://unpkg.com/html5-qrcode@latest"></script>
 </head>
 <body>
-    <h1>Scan QR Code to Open Google Drive Link</h1>
+    <h1>Scan QR Code to Open Link</h1>
     <div id="qr-reader" style="width: 300px;"></div>
     <div id="qr-reader-results"></div>
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            // เมื่อสแกน QR Code สำเร็จ
-            console.log(`ผลการสแกน: ${decodedText}`);
+            // Action to take when QR Code is scanned
+            console.log(`Scan result: ${decodedText}`);
             document.getElementById('qr-reader-results').innerHTML = `Scanned: ${decodedText}`;
 
-            // เปิดลิงก์ Google Drive
-            window.open(decodedText, '_blank');
+            // Open the scanned link
+            window.location.href = decodedText;
         }
 
         var html5QrcodeScanner = new Html5QrcodeScanner(
