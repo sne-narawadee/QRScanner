@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Scan QR Code</title>
-    <script src="https://unpkg.com/html5-qrcode@latest"></script>
+    <script src="https://unpkg.com/html5-qrcode@latest"></script> <!-- QR Code scanner library -->
 </head>
 <body>
     <h1>Scan QR Code to Open Link</h1>
@@ -12,10 +12,10 @@
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Scan result: ${decodedText}`);
+            console.log(`Scanned: ${decodedText}`);
 
-            // Open the link in the default browser immediately
-            window.open(decodedText, '_self'); // Open in the same window or tab
+            // เปิดลิงก์ในแท็บเดียวกัน
+            window.location.href = decodedText; // หากเป็นแอปที่เปิดลิงก์ QR code ลิงก์นี้จะเปิดในเบราว์เซอร์เริ่มต้น
         }
 
         var html5QrcodeScanner = new Html5QrcodeScanner(
