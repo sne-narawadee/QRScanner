@@ -81,7 +81,6 @@
         $("#reader-fullscreen").hide(); // Hide the fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
-        listCameras(); // Refresh the camera list
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -101,7 +100,7 @@
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
       const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ deviceId: { exact: selectedDevice } }, config, qrCodeSuccessCallback)
+      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback) // Start with back camera by default
         .then(() => {
           isCameraRunning = true;
         })
