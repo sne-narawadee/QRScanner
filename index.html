@@ -135,35 +135,6 @@
   </script>
   <script>
 
-    function scanresult(message) {
-     var submsg = message.split(",")  ; 
-     var fname = submsg[0]
-     var classroom = submsg[1]
-     var num = submsg[2]
-
-         document.getElementById('fname').value = fname
-         document.getElementById('num').value = num
-         document.getElementById('classroom').value = classroom
-
-            Swal.fire({
-                title: 'ข้อมูล: ' + message,
-                icon: 'warning',
-                confirmButtonText: 'ตกลง',
-                confirmButtonColor: '#0d6efd',
-                 showClass: {
-                    popup: 'animate__animated animate__fadeInDown'
-                  },
-                  hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp'
-                  },
-            }).then((result) => {
-                if (result.isConfirmed){
-                document.getElementById('page1').style.display="none";
-                document.getElementById('page2').style.display="block";
-                  }
-                })
-        }
-
       $("#scan").on("click", function () {
         if ($(this).html() == "เปิดกล้อง") {
           $(this)
