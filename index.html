@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>QR Code Scanner</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/instascan/1.0.0/instascan.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
 </head>
 <body>
     <h1>Scan QR Code</h1>
-    <video id="preview" style="width: 100%;"></video>
+    <video id="preview" autoplay style="width: 100%;"></video>
+    <canvas id="canvas" style="display: none;"></canvas>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+        const video = document.getElementById('preview');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
 
-            scanner.addListener('scan', function(content) {
-                window.location.href = content; // เปิดลิงก์โดยอัตโนมัติ
-            });
+        function scanQRCode() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            Instascan.Camera.getCameras().then(function(cameras) {
-                if (cameras.length > 0) {
-                    scanner.start(cameras[0]);
-                } else {
-                    console.error('No cameras found.');
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                if (code) {
+                    window.location.href = code.data;
                 }
-            }).catch(function(e) {
-                console.error(e);
-            });
-        });
+            }
+
+            requestAnimationFrame(scanQRCode);
+        }
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    scanQRCode(); // เริ่มสแกน QR code
+                })
+                .catch(function(error) {
+                    console.error('Error accessing camera:', error);
+                });
+        } else {
+            console.error('Camera not supported');
+        }
     </script>
 </body>
 </html>
