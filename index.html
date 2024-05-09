@@ -25,20 +25,19 @@
 <body>
   <div class="container">
     <div class="col-md-8 mx-auto">
-      <div id="camera-container" class="fullscreen" style="display: none;"> <!-- กล้องเต็มหน้าจอ -->
-        <div id="reader-fullscreen"></div>
+      <div id="camera-container" class="fullscreen" style="display: none;"> <!-- เฟรมกล้อง -->
+        <div id="reader-fullscreen"></div> <!-- ใช้สำหรับสแกน QR Code -->
         <button id="close-camera" class="btn btn-danger col-md-12 col-12" style="position: absolute; bottom: 10px;">ปิดกล้อง</button>
       </div>
-      <button id="scan" class="btn btn-warning col-md-12 mt-2">เปิดกล้อง</button>
+      <button id="scan" class="btn btn-warning col-md-12 mt-2">เปิดกล้อง</button> <!-- ปุ่มเปิดกล้อง -->
     </div>
   </div>
 
   <script>
-    const html5QrCode = new Html5Qrcode("reader-fullscreen");
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    const html5QrCode = new Html5Qrcode("reader-fullscreen"); // สร้างเฟรมสแกน
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } }; // กำหนดค่า
 
-    // Callback เมื่อสแกนสำเร็จ
-    const qrCodeSuccessCallback = (message) => {
+    const qrCodeSuccessCallback = (message) => { // เมื่อสแกนสำเร็จ
       html5QrCode.stop() // หยุดการสแกนกล้อง
         .then(() => {
           console.log("Scanned message:", message);
@@ -47,33 +46,30 @@
           $("#camera-container").hide();
           $("#scan").html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
 
-          // เปิดลิงก์ที่สแกนมาในหน้าเดียวกัน
-          window.location.href = message;
-
+          // เปิดลิงก์ในหน้าเดียวกัน
+          window.location.href = message; // แทนที่หน้าเว็บด้วยลิงก์ที่สแกน
         })
         .catch((err) => {
           console.error("Error stopping QR code scanner:", err);
         });
     };
 
-    // ตั้งค่าปุ่มเปิด/ปิดกล้อง
-    $("#scan").on("click", function() {
+    $("#scan").on("click", function() { // เปิด/ปิดกล้อง
       const isStarting = $(this).html() === "เปิดกล้อง";
       const cameraContainer = $("#camera-container");
 
-      if (isStarting) {
+      if (isStarting) { // เริ่มสแกน
         $(this).html("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
         cameraContainer.show(); // แสดงเฟรมกล้อง
         html5QrCode.start({ deviceId: { exact: null } }, config, qrCodeSuccessCallback); // เริ่มการสแกน
-      } else {
+      } else { // หยุดสแกน
         $(this).html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         cameraContainer.hide(); // ซ่อนเฟรมกล้อง
         html5QrCode.stop(); // หยุดการสแกน
       }
     });
 
-    // ปิดกล้อง
-    $("#close-camera").on("click", function() {
+    $("#close-camera").on("click", function() { // ปิดกล้องด้วยปุ่ม "ปิดกล้อง"
       $("#scan").html("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
       $("#camera-container").hide(); // ซ่อนเฟรมกล้อง
       html5QrCode.stop(); // หยุดการสแกน
