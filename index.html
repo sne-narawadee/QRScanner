@@ -2,25 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Scan QR Code</title>
-    <script src="https://unpkg.com/html5-qrcode@latest"></script> <!-- QR Code scanning library -->
+    <title>QR Code Scanner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/instascan/1.0.0/instascan.min.js"></script>
 </head>
 <body>
-    <h1>Scan QR Code to Open Link</h1>
-    <div id="qr-reader" style="width: 300px;"></div>
+    <h1>Scan QR Code</h1>
+    <video id="preview" style="width: 100%;"></video>
 
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Scanned: ${decodedText}`);
+        document.addEventListener("DOMContentLoaded", function() {
+            let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
 
-            // เปลี่ยนเส้นทางไปยังลิงก์ที่สแกนได้
-            window.location.href = decodedText; // เปลี่ยนเส้นทางไปยังลิงก์ที่สแกนได้
-        }
+            scanner.addListener('scan', function(content) {
+                window.location.href = content; // เปิดลิงก์โดยอัตโนมัติ
+            });
 
-        var html5QrcodeScanner = new Html5QrcodeScanner(
-            "qr-reader", { fps: 10, qrbox: 250 });
-
-        html5QrcodeScanner.render(onScanSuccess);
+            Instascan.Camera.getCameras().then(function(cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]);
+                } else {
+                    console.error('No cameras found.');
+                }
+            }).catch(function(e) {
+                console.error(e);
+            });
+        });
     </script>
 </body>
 </html>
