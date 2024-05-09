@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>QR Code Scanner</title>
+    <title>QR Code Scanner - Rear Camera</title>
     <script src="https://cdn.jsdelivr.net/npm/jsQR@1.3.1/dist/jsQR.min.js"></script>
 </head>
 <body>
@@ -35,7 +35,7 @@
         }
 
         function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(function(stream) {
                     video.srcObject = stream;
                     video.style.display = 'block'; // แสดงวิดีโอเมื่อได้รับอนุญาต
@@ -48,7 +48,6 @@
                 });
         }
 
-        // เริ่มขออนุญาตกล้องเมื่อโหลดหน้าเว็บ
         document.addEventListener("DOMContentLoaded", startCamera);
     </script>
 </body>
