@@ -12,12 +12,12 @@
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            // Action to take when QR Code is scanned
-            console.log(`Scan result: ${decodedText}`);
+            // เมื่อสแกน QR Code สำเร็จ
+            console.log(`ผลการสแกน: ${decodedText}`);
             document.getElementById('qr-reader-results').innerHTML = `Scanned: ${decodedText}`;
 
-            // Open the scanned link
-            window.location.href = decodedText;
+            // เปิดลิงก์ในแท็บใหม่
+            window.open(decodedText, '_blank'); // ใช้ _blank เพื่อเปิดในแท็บใหม่
         }
 
         var html5QrcodeScanner = new Html5QrcodeScanner(
