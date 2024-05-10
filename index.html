@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
+  <title>ระบบสแกน QR-CODE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.0.1/html5-qrcode.min.js"></script>
@@ -23,10 +24,6 @@
       z-index: 1000;
       background: white;
     }
-    /* ซ่อน select element แต่ยังคงให้ JavaScript ใช้งานได้ */
-    #deviceSelect {
-      display: none; /* ซ่อนจากหน้าจอ */
-    }
   </style>
 </head>
 <body>
@@ -42,6 +39,7 @@
     </div>
 
     <div class="text-center mt-3">
+      <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
       <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
     </div>
   </div>
@@ -60,32 +58,37 @@
           return;
         }
 
-        deviceSelect.innerHTML = ""; // เคลียร์ตัวเลือกเก่า
-        devices.forEach(device => {
+        deviceSelect.innerHTML = ""; // Clear existing options
+        let defaultCameraIndex = 0; // Default to the first camera
+
+        devices.forEach((device, index) => {
           const option = document.createElement("option");
           option.value = device.id;
           option.textContent = device.label;
+
+          if (device.label.toLowerCase().includes("back") || "rear") {
+            defaultCameraIndex = index; // Default to back camera
+          }
+
           deviceSelect.appendChild(option);
         });
 
-        // ตั้งค่ากล้องตัวแรกเป็นค่าเริ่มต้น
-        if (devices.length > 0) {
-          deviceSelect.selectedIndex = 0;
-        }
+        // Set the default to the first camera
+        deviceSelect.selectedIndex = defaultCameraIndex;
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการค้นหากล้อง:", err);
       });
   };
 
-  listCameras(); // เรียกใช้เพื่อแสดงกล้องที่มีอยู่
+  listCameras(); // Initial call to list cameras
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-        window.open(decodedText, "_blank"); // เปิดลิงค์ที่สแกนในแท็บใหม่
-        $("#reader-fullscreen").hide(); // ซ่อนส่วนของกล้อง
+        window.open(decodedText, "_blank"); // Open in new tab
+        $("#reader-fullscreen").hide(); // Hide the fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
       })
@@ -95,19 +98,19 @@
   };
 
   const config = {
-    fps: 10, // จำนวนภาพต่อวินาที
+    fps: 10, // Frames per second
     qrbox: { width: 250, height: 250 },
     aspectRatio: 1,
-    facingMode: "environment" // ใช้กล้องด้านหลัง
+    facingMode: "environment" // Default to back camera
   };
 
   $("#toggleCamera").on("click", function() {
     if (!isCameraRunning) {
-      $("#reader-fullscreen").show(); // แสดงกล้องแบบเต็มหน้าจอ
+      $("#reader-fullscreen").show(); // Show the fullscreen camera
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
-      const selectedDevice = deviceSelect.value; // ใช้กล้องที่ถูกเลือก
-      html5QrCode.start(selectedDevice, config, qrCodeSuccessCallback)
+      const selectedDevice = deviceSelect.value;
+      html5QrCode.start({ deviceId: selectedDevice }, config, qrCodeSuccessCallback)
         .then(() => {
           isCameraRunning = true;
         })
@@ -115,7 +118,7 @@
           console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
         });
     } else {
-      $("#reader-fullscreen").hide(); // ซ่อนส่วนของกล้อง
+      $("#reader-fullscreen").hide(); // Hide the fullscreen
       $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
 
       html5QrCode.stop()
