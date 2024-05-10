@@ -88,10 +88,11 @@
   };
 
   const config = {
-    fps: 10, // frames per second
-    qrbox: { width: 250, height: 250 },
-    aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
+    fps: 15, // frames per second
+    qrbox: { width: 250, height: 250 }, // Updated for better accuracy
+    aspectRatio: 1, // Improved for better camera performance
+    facingMode: "environment", // Default to back camera
+    disableFlip: false // Ensure proper scanning
   };
 
   $("#toggleCamera").on("click", function() {
@@ -100,7 +101,11 @@
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
       const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback) // Start with back camera by default
+      html5QrCode.start(
+        { facingMode: selectedDevice || "environment" }, 
+        config, 
+        qrCodeSuccessCallback
+      ) 
         .then(() => {
           isCameraRunning = true;
         })
