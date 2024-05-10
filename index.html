@@ -79,8 +79,7 @@
         console.log("QR code สแกนสำเร็จ:", decodedText);
         window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
         $("#reader-fullscreen").hide(); // Hide the fullscreen
-        $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
-        isCameraRunning = false;
+        $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").เพิ่มอัตราเฟรม
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -88,10 +87,11 @@
   };
 
   const config = {
-    fps: 10, // frames per second
-    qrbox: { width: 250, height: 250 },
+    fps: 30, // เพิ่มอัตราเฟรม
+    qrbox: { width: 350, height: 350 }, // ขยายกล่อง QR
     aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
+    resolution: 1920, // เพิ่มความละเอียด
+    facingMode: "environment", // Default to back camera
   };
 
   $("#toggleCamera").on("click", function() {
@@ -100,7 +100,7 @@
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
       const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback) // Start with back camera by default
+      html5QrCode.start({ facingMode: "environment", deviceId: selectedDevice }, config, qrCodeSuccessCallback) // เพิ่ม deviceId
         .then(() => {
           isCameraRunning = true;
         })
