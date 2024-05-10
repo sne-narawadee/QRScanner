@@ -38,14 +38,40 @@
     </div>
 
     <div class="text-center mt-3">
-      <button id="toggleCamera" class="btn btn-warning">เปิดกล้อง</button>
+      <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
+      <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
     </div>
   </div>
 </div>
 
 <script>
   const html5QrCode = new Html5Qrcode("reader-fullscreen");
+  const deviceSelect = document.getElementById("deviceSelect");
   let isCameraRunning = false;
+
+  // Function to get and list all camera devices
+  const listCameras = () => {
+    Html5Qrcode.getCameras()
+      .then(devices => {
+        if (devices.length === 0) {
+          console.error("ไม่พบอุปกรณ์กล้อง");
+          return;
+        }
+
+        deviceSelect.innerHTML = ""; // Clear existing options
+        devices.forEach(device => {
+          const option = document.createElement("option");
+          option.value = device.id;
+          option.textContent = device.label;
+          deviceSelect.appendChild(option);
+        });
+      })
+      .catch(err => {
+        console.error("เกิดข้อผิดพลาดในการค้นหากล้อง:", err);
+      });
+  };
+
+  listCameras(); // Initial call to list cameras
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
@@ -73,7 +99,8 @@
       $("#reader-fullscreen").show(); // Show the fullscreen camera
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
-      html5QrCode.start(config, qrCodeSuccessCallback) // Start with the back camera
+      const selectedDevice = deviceSelect.value;
+      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback) // Start with back camera by default
         .then(() => {
           isCameraRunning = true;
         })
