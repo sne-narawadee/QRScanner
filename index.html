@@ -23,10 +23,11 @@
       z-index: 1000;
       background: white;
     }
-    /* ซ่อน select element แต่ยังคงไว้สำหรับ script ใช้งาน */
-+   #deviceSelect {
-+     display: none;
-+   }
+    /* ซ่อน select element แต่ยังคงให้ใช้งานได้โดย JavaScript */
+    #deviceSelect {
+      visibility: hidden; /* ซ่อนแต่ยังสามารถเข้าถึงได้ */
+      height: 0; /* ทำให้ไม่ใช้พื้นที่ */
+    }
   </style>
 </head>
 <body>
@@ -42,7 +43,7 @@
     </div>
 
     <div class="text-center mt-3">
-      <!-- องค์ประกอบ select นี้ถูกซ่อน -->
+      <!-- ซ่อน dropdown select โดยใช้ visibility: hidden -->
       <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
       <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
     </div>
@@ -54,7 +55,6 @@
   const deviceSelect = document.getElementById("deviceSelect");
   let isCameraRunning = false;
 
-  // Function to get and list all camera devices
   const listCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
@@ -71,9 +71,9 @@
           deviceSelect.appendChild(option);
         });
 
-        // ตั้งค่า default กล้องที่เลือก
+        // ตั้งค่ากล้องที่เลือก
         if (devices.length > 0) {
-          deviceSelect.selectedIndex = 0;
+          deviceSelect.selectedIndex = 0; // เลือกกล้องตัวแรก
         }
       })
       .catch(err => {
@@ -81,14 +81,14 @@
       });
   };
 
-  listCameras(); // Initial call to list cameras
+  listCameras(); // เรียกใช้เพื่อแสดงกล้องที่มีอยู่
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
         window.open(decodedText, "_blank"); // เปิดในแท็บใหม่
-        $("#reader-fullscreen").hide(); // Hide the fullscreen
+        $("#reader-fullscreen").hide(); // ซ่อนกล้อง fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
       })
@@ -98,19 +98,19 @@
   };
 
   const config = {
-    fps: 10, // frames per second
+    fps: 10, // กรอบต่อวินาที
     qrbox: { width: 250, height: 250 },
     aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
+    facingMode: "environment" // ตั้งค่าเป็นกล้องด้านหลัง
   };
 
   $("#toggleCamera").on("click", function() {
     if (!isCameraRunning) {
-      $("#reader-fullscreen").show(); // Show the fullscreen camera
+      $("#reader-fullscreen").show(); // แสดงกล้องแบบเต็มหน้าจอ
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
       const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback) // Start with back camera by default
+      html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
         .then(() => {
           isCameraRunning = true;
         })
@@ -118,8 +118,8 @@
           console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
         });
     } else {
-      $("#reader-fullscreen").hide(); // Hide the fullscreen
-      $(this).text("เปิดกล้อง"). removeClass("btn-danger").addClass("btn-warning");
+      $("#reader-fullscreen").hide(); // ซ่อน fullscreen
+      $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
 
       html5QrCode.stop()
         .then(() => {
