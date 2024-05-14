@@ -87,7 +87,8 @@
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-        window.open(decodedText, "_blank"); // Open in new tab
+        //window.open(decodedText, "_blank"); // Open in new tab
+        window.open(decodedText);
         $("#reader-fullscreen").hide(); // Hide the fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
