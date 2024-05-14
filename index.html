@@ -41,6 +41,7 @@
     <div class="text-center mt-3">
       <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
       <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
+      <button id="backButton" class="btn btn-secondary mt-3">ย้อนกลับ</button>
     </div>
   </div>
 </div>
@@ -129,6 +130,10 @@
           console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
         });
     }
+  });
+
+  $("#backButton").on("click", function() {
+    window.history.back();
   });
 </script>
 
