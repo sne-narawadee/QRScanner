@@ -28,7 +28,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="scannerPage">
   <div class="col-md-8 mx-auto">
     <div class="bg-primary text-white mb-2 p-2 text-center">
       <h2>ระบบสแกน QR-CODE</h2>
@@ -41,7 +41,19 @@
     <div class="text-center mt-3">
       <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
       <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
-      <button id="backButton" class="btn btn-secondary mt-3">ย้อนกลับ</button>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="resultPage" style="display: none;">
+  <div class="col-md-8 mx-auto">
+    <div class="bg-primary text-white mb-2 p-2 text-center">
+      <h2>ผลการสแกน QR-CODE</h2>
+    </div>
+
+    <div class="text-center mt-3">
+      <p id="scanResult"></p>
+      <button id="backButton" class="btn btn-secondary">ย้อนกลับ</button>
     </div>
   </div>
 </div>
@@ -88,10 +100,11 @@
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-        window.open(decodedText, "_blank"); // Open in new tab
+        document.getElementById("scanResult").innerText = decodedText;
         $("#reader-fullscreen").hide(); // Hide the fullscreen
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
+        showResultPage();
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
@@ -133,8 +146,18 @@
   });
 
   $("#backButton").on("click", function() {
-    window.history.back();
+    showScannerPage();
   });
+
+  const showResultPage = () => {
+    $("#scannerPage").hide();
+    $("#resultPage").show();
+  };
+
+  const showScannerPage = () => {
+    $("#resultPage").hide();
+    $("#scannerPage").show();
+  };
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
