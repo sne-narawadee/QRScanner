@@ -98,24 +98,26 @@
   };
 
   listCameras(); // Initial call to list cameras
+  
 
   const qrCodeSuccessCallback = (decodedText) => {
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-        $("#reader-fullscreen").hide(); // Hide the fullscreen
+  
+        // Open the URL in a new tab
+        window.open(decodedText, "_blank");
+  
+        // Reset camera UI
+        $("#reader-fullscreen").hide();
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
         isCameraRunning = false;
-
-        // Display the iframe and back button
-        iframeContainer.innerHTML = `<iframe src="${decodedText}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-        iframeContainer.style.display = "block";
-        backButton.style.display = "block";
       })
       .catch(err => {
         console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
       });
   };
+
 
   const config = {
     fps: 10, // Frames per second
