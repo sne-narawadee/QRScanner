@@ -60,11 +60,10 @@
 <div id="iframe-container" style="display: none;"></div>
 
 <script>
-  const html5QrCode = new Html5Qrcode("reader-fullscreen");
-  const deviceSelect = document.getElementById("deviceSelect");
-  const backButton = document.getElementById("backButton");
-  const iframeContainer = document.getElementById("iframe-container");
-  let isCameraRunning = false;
+  const html5QrCodeFullscreen = new Html5Qrcode("reader-fullscreen");
+  let html5QrCodeIframe = null;
+  let isCameraRunningFullscreen = false;
+  let isCameraRunningIframe = false;
 
   const listCameras = () => {
     Html5Qrcode.getCameras()
@@ -82,7 +81,7 @@
           option.value = device.id;
           option.textContent = device.label;
 
-          if (device.label.toLowerCase().includes("back") || "rear") {
+          if (device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("rear")) {
             defaultCameraIndex = index; // Default to back camera
           }
 
@@ -98,75 +97,97 @@
   };
 
   listCameras(); // Initial call to list cameras
-  
 
-  const qrCodeSuccessCallback = (decodedText) => {
-    html5QrCode.stop()
+  const qrCodeSuccessCallbackFullscreen = (decodedText) => {
+    html5QrCodeFullscreen.stop()
       .then(() => {
-        console.log("QR code สแกนสำเร็จ:", decodedText);
-  
-        // Open the URL in a new tab
+        console.log("QR code สแกนสำเร็จ (Fullscreen):", decodedText);
         window.open(decodedText, "_blank");
-  
-        // Reset camera UI
         $("#reader-fullscreen").hide();
-        $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
-        isCameraRunning = false;
+        $("#toggleCamera").text("เปิดกล้อง (Fullscreen)").removeClass("btn-danger").addClass("btn-warning");
+        isCameraRunningFullscreen = false;
       })
       .catch(err => {
-        console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
+        console.error("เกิดข้อผิดพลาดในการหยุดกล้อง (Fullscreen):", err);
       });
   };
 
-
-  const config = {
-    fps: 10, // Frames per second
-    qrbox: { width: 250, height: 250 },
-    aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
+  const startCameraInIframe = (selectedDevice) => {
+    html5QrCodeIframe = new Html5Qrcode("iframe-container");
+    html5QrCodeIframe.start({ deviceId: selectedDevice })
+      .then(() => {
+        isCameraRunningIframe = true;
+      })
+      .catch(err => {
+        console.error("เกิดข้อผิดพลาดในการเริ่มกล้องใน iframe:", err);
+      });
   };
 
   $("#toggleCamera").on("click", function() {
-    if (!isCameraRunning) {
-      $("#reader-fullscreen").show(); // Show the fullscreen camera
+    const selectedDevice = deviceSelect.value;
+
+    if (!isCameraRunningFullscreen && !isCameraRunningIframe) {
+      if (window.self !== window.top) {
+        // Inside an iframe
+        startCameraInIframe(selectedDevice);
+        $("#iframe-container").show();
+      } else {
+        // Fullscreen mode
+        html5QrCodeFullscreen.start({ deviceId: selectedDevice }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1, facingMode: "environment" }, qrCodeSuccessCallbackFullscreen)
+          .then(() => {
+            isCameraRunningFullscreen = true;
+          })
+          .catch(err => {
+            console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง (Fullscreen):", err);
+          });
+      }
+
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
-
-      const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ deviceId: selectedDevice }, config, qrCodeSuccessCallback)
-        .then(() => {
-          isCameraRunning = true;
-        })
-        .catch(err => {
-          console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
-        });
     } else {
-      $("#reader-fullscreen").hide(); // Hide the fullscreen
-      $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+      if (isCameraRunningFullscreen) {
+        html5QrCodeFullscreen.stop()
+          .then(() => {
+            isCameraRunningFullscreen = false;
+          })
+          .catch(err => {
+            console.error("เกิดข้อผิดพลาดในการหยุดกล้อง (Fullscreen):", err);
+          });
+      }
 
-      html5QrCode.stop()
-        .then(() => {
-          isCameraRunning = false;
-        })
-        .catch(err => {
-          console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
-        });
+      if (isCameraRunningIframe) {
+        html5QrCodeIframe.stop()
+          .then(() => {
+            isCameraRunningIframe = false;
+            $("#iframe-container").hide();
+          })
+          .catch(err => {
+            console.error("เกิดข้อผิดพลาดในการหยุดกล้องใน iframe:", err);
+          });
+      }
+
+      $(this).text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
     }
   });
 
   backButton.addEventListener("click", function() {
-    // Hide the iframe and back button, show the camera interface
-    iframeContainer.style.display = "none";
-    backButton.style.display = "none";
-    $("#reader-fullscreen").show(); // Show the fullscreen camera
-    html5QrCode.start({ deviceId: deviceSelect.value }, config, qrCodeSuccessCallback)
-      .then(() => {
-        isCameraRunning = true;
-      })
-      .catch(err => {
-        console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
-      });
+    if (isCameraRunningIframe) {
+      html5QrCodeIframe.stop()
+        .then(() => {
+          isCameraRunningIframe = false;
+          $("#iframe-container").hide();
+        })
+        .catch(err => {
+          console.error("เกิดข้อผิดพลาดในการหยุดกล้องใน iframe:", err);
+        });
+    }
+
+    $("#reader-fullscreen").show();
+    $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
+    isCameraRunningFullscreen = false;
   });
 </script>
+
+  
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
