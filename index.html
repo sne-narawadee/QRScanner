@@ -45,18 +45,24 @@
       <h2>ระบบสแกน QR-CODE</h2>
     </div>
 
+    <div id="login-container">
+      <input type="text" id="username" class="form-control" placeholder="ชื่อผู้ใช้">
+      <input type="password" id="password" class="form-control mt-2" placeholder="รหัสผ่าน">
+      <button id="loginButton" class="btn btn-primary mt-3">เข้าสู่ระบบ</button>
+    </div>
+
     <div id="reader-container">
       <div id="reader-fullscreen" class="fullscreen" style="display: none;"></div>
     </div>
 
     <div class="text-center mt-3">
       <select id="deviceSelect" class="form-select" style="width: 80%; margin: auto;"></select>
-      <button id="toggleCamera" class="btn btn-warning mt-3">เปิดกล้อง</button>
+      <button id="toggleCamera" class="btn btn-warning mt-3" style="display: none;">เปิดกล้อง</button>
     </div>
   </div>
 </div>
 
-<button id="backButton" class="btn btn-secondary">ย้อนกลับ</button>
+<button id="backButton" class="btn btn-secondary" style="display: none;">ย้อนกลับ</button>
 <div id="iframe-container" style="display: none;"></div>
 
 <script>
@@ -82,7 +88,7 @@
           option.value = device.id;
           option.textContent = device.label;
 
-          if (device.label.toLowerCase().includes("back") || "rear") {
+          if (device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("rear")) {
             defaultCameraIndex = index; // Default to back camera
           }
 
@@ -98,16 +104,20 @@
   };
 
   listCameras(); // Initial call to list cameras
-  
 
   const qrCodeSuccessCallback = (decodedText) => {
+    if (!isLoggedIn()) {
+      alert("กรุณาเข้าสู่ระบบก่อนใช้งาน");
+      return;
+    }
+
     html5QrCode.stop()
       .then(() => {
         console.log("QR code สแกนสำเร็จ:", decodedText);
-  
+
         // Open the URL in a new tab
         window.open(decodedText, "_blank");
-  
+
         // Reset camera UI
         $("#reader-fullscreen").hide();
         $("#toggleCamera").text("เปิดกล้อง").removeClass("btn-danger").addClass("btn-warning");
@@ -118,6 +128,15 @@
       });
   };
 
+  function isLoggedIn() {
+    // Add your authentication logic here
+    // For simplicity, let's assume username and password are hardcoded
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // Example hardcoded credentials (replace with your actual authentication logic)
+    return username === "admin" && password === "password";
+  }
 
   const config = {
     fps: 10, // Frames per second
@@ -125,6 +144,16 @@
     aspectRatio: 1,
     facingMode: "environment" // Default to back camera
   };
+
+  $("#loginButton").on("click", function() {
+    if (isLoggedIn()) {
+      $("#login-container").hide();
+      $("#toggleCamera").show();
+      listCameras(); // Refresh camera list
+    } else {
+      alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+    }
+  });
 
   $("#toggleCamera").on("click", function() {
     if (!isCameraRunning) {
