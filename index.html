@@ -76,23 +76,24 @@
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    // Google Sheets API endpoint
-    const sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/{your-spreadsheet-id}/values/Data!A1:B?key={your-api-key}';
-
-    return fetch(sheetUrl)
+    return fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    })
       .then(response => response.json())
       .then(data => {
-        // Iterate through data to find matching username and password
-        for (let i = 0; i < data.values.length; i++) {
-          if (data.values[i][0] === username && data.values[i][1] === password) {
-            return true;
-          }
+        if (data.loggedIn) {
+          return true;
+        } else {
+          return false;
         }
-        return false; // No matching username and password found
       })
       .catch(error => {
-        console.error('Error fetching data:', error);
-        return false; // Error occurred, return false
+        console.error('Error:', error);
+        return false;
       });
   }
 
@@ -211,5 +212,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
 </body>
 </html>
