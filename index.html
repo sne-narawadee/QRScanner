@@ -134,7 +134,7 @@
     const password = document.getElementById("password").value;
 
     // Check against database (Google Sheets in this case)
-    return fetch('https://sheets.googleapis.com/v4/spreadsheets/{1_N0TUGHael9C6LSfTuHvryu4t635Bm5ZjiNdt7bd-fU}/values/Login!A1:B100?key={AIzaSyD1zyXu4ydcj4Cs07JYwyUB_WguSTgd1nc}')
+    return fetch('https://sheets.googleapis.com/v4/spreadsheets/{1_N0TUGHael9C6LSfTuHvryu4t635Bm5ZjiNdt7bd-fU}/values/Data!A1:B?key={AIzaSyD1zyXu4ydcj4Cs07JYwyUB_WguSTgd1nc}')
       .then(response => response.json())
       .then(data => {
         // Iterate through data to find matching username and password
