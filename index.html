@@ -72,6 +72,30 @@
   const iframeContainer = document.getElementById("iframe-container");
   let isCameraRunning = false;
 
+  function isLoggedIn() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // Google Sheets API endpoint
+    const sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/{your-spreadsheet-id}/values/Data!A1:B?key={your-api-key}';
+
+    return fetch(sheetUrl)
+      .then(response => response.json())
+      .then(data => {
+        // Iterate through data to find matching username and password
+        for (let i = 0; i < data.values.length; i++) {
+          if (data.values[i][0] === username && data.values[i][1] === password) {
+            return true;
+          }
+        }
+        return false; // No matching username and password found
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        return false; // Error occurred, return false
+      });
+  }
+
   const listCameras = () => {
     Html5Qrcode.getCameras()
       .then(devices => {
@@ -128,44 +152,19 @@
       });
   };
 
-  function isLoggedIn() {
-    // Add your authentication logic here
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    // Check against database (Google Sheets in this case)
-    return fetch('https://sheets.googleapis.com/v4/spreadsheets/{1_N0TUGHael9C6LSfTuHvryu4t635Bm5ZjiNdt7bd-fU}/values/Data!A1:B?key={AIzaSyD1zyXu4ydcj4Cs07JYwyUB_WguSTgd1nc}')
-      .then(response => response.json())
-      .then(data => {
-        // Iterate through data to find matching username and password
-        for (let i = 0; i < data.values.length; i++) {
-          if (data.values[i][0] === username && data.values[i][1] === password) {
-            return true;
-          }
-        }
-        return false;
-      })
-      .catch(error => {
-        console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
-        return false;
-      });
-  }
-
-  const config = {
-    fps: 10, // Frames per second
-    qrbox: { width: 250, height: 250 },
-    aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
-  };
-
   $("#loginButton").on("click", function() {
-    if (isLoggedIn()) {
-      $("#login-container").hide();
-      $("#toggleCamera").show();
-      listCameras(); // Refresh camera list
-    } else {
-      alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-    }
+    isLoggedIn().then(isLogged => {
+      if (isLogged) {
+        $("#login-container").hide();
+        $("#toggleCamera").show();
+        listCameras(); // Refresh camera list
+      } else {
+        alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      }
+    }).catch(err => {
+      console.error('Login error:', err);
+      alert("เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
+    });
   });
 
   $("#toggleCamera").on("click", function() {
@@ -174,7 +173,7 @@
       $(this).text("ปิดกล้อง").removeClass("btn-warning").addClass("btn-danger");
 
       const selectedDevice = deviceSelect.value;
-      html5QrCode.start({ deviceId: selectedDevice }, config, qrCodeSuccessCallback)
+      html5QrCode.start({ deviceId: selectedDevice }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 })
         .then(() => {
           isCameraRunning = true;
         })
@@ -200,7 +199,7 @@
     iframeContainer.style.display = "none";
     backButton.style.display = "none";
     $("#reader-fullscreen").show(); // Show the fullscreen camera
-    html5QrCode.start({ deviceId: deviceSelect.value }, config, qrCodeSuccessCallback)
+    html5QrCode.start({ deviceId: deviceSelect.value }, { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 }, qrCodeSuccessCallback)
       .then(() => {
         isCameraRunning = true;
       })
