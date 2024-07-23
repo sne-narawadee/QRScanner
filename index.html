@@ -10,12 +10,7 @@
     body {
       font-family: Arial, sans-serif;
     }
-    iframe {
-      width: 100%;
-      height: 500px;
-      border: none;
-    }
-    video {
+    #video {
       width: 100%;
       max-width: 400px;
       height: auto;
@@ -28,55 +23,24 @@
   <h2 class="text-center mt-3">ระบบสแกน QR-CODE</h2>
 
   <div class="text-center mt-3">
-    <button id="openCameraBtn" class="btn btn-warning">เปิดกล้องใน iframe</button>
+    <button id="openCameraBtn" class="btn btn-warning">เปิดกล้องเพื่อสแกน QR code</button>
   </div>
 
-  <iframe id="cameraIframe" src="child.html"></iframe>
+  <video id="video" style="display: none;"></video>
 </div>
 
 <script>
-  // ฟังก์ชันสำหรับเปิดกล้องใน iframe
-  function openCameraInIframe() {
-    const iframe = document.getElementById('cameraIframe');
-    iframe.contentWindow.postMessage({ action: 'startScan' }, '*');
-  }
-
-  // รับข้อมูลจาก iframe
-  window.addEventListener('message', function(event) {
-    if (event.origin !== window.location.origin) return; // ป้องกันการส่งข้อมูลจากอื่นๆ
-
-    const { type, data } = event.data;
-
-    if (type === 'qrCodeScanned') {
-      console.log('QR code สแกนสำเร็จ:', data);
-
-      // เปิด URL ที่สแกนได้ในหน้าต่างใหม่
-      window.open(data, '_blank');
-    }
-  });
-
-  // ส่วนของ iframe (child.html)
-  // รับข้อความและเริ่มการสแกน QR code
-  window.addEventListener('message', function(event) {
-    const { action } = event.data;
-
-    if (action === 'startScan') {
-      startScan();
-    }
-  });
-
   let qrCodeScanner;
+
+  // ฟังก์ชันเมื่อคลิกที่ปุ่มเปิดกล้อง
+  document.getElementById('openCameraBtn').addEventListener('click', function() {
+    startScan();
+  });
 
   // ฟังก์ชันเริ่มการสแกน
   function startScan() {
-    const videoElem = document.createElement('video');
-    videoElem.setAttribute('id', 'video');
-    videoElem.style.width = '100%';
-    videoElem.style.maxWidth = '400px';
-    videoElem.style.height = 'auto';
+    const videoElem = document.getElementById('video');
     videoElem.style.display = 'block';
-
-    document.body.appendChild(videoElem);
 
     // ขออนุญาตใช้กล้อง
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
@@ -97,8 +61,8 @@
   function resultCallback(result) {
     console.log('QR code สแกนสำเร็จ:', result);
 
-    // ส่งข้อมูลผลลัพธ์กลับไปยัง Parent Window
-    window.parent.postMessage({ type: 'qrCodeScanned', data: result }, '*');
+    // เปิด URL ที่สแกนได้ในหน้าต่างใหม่
+    window.open(result, '_blank');
 
     // หยุดการสแกน QR code
     qrCodeScanner.stop();
