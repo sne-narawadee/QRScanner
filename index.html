@@ -15,14 +15,10 @@
       width: 100%;
       height: 250px;
     }
-    .fullscreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1000;
-      background: white;
+    .iframe-container {
+      width: 100%;
+      height: 80vh; /* ให้ iframe มีความสูงเท่ากับ 80% ของ viewport height */
+      border: none; /* ลบเส้นขอบของ iframe */
     }
   </style>
 </head>
@@ -34,46 +30,64 @@
       <h2>ระบบสแกน QR-CODE</h2>
     </div>
 
-    <div id="reader-container">
-      <div id="reader-fullscreen" class="fullscreen"></div>
+    <div class="text-center mt-3">
+      <a href="#" id="openCameraLink" class="btn btn-warning">เปิดกล้องใน iframe</a>
+    </div>
+
+    <div class="iframe-container mt-3">
+      <iframe id="cameraIframe" frameborder="0"></iframe>
     </div>
   </div>
 </div>
 
 <script>
-  const html5QrCode = new Html5Qrcode("reader-fullscreen");
-  let isCameraRunning = false;
+  // เมื่อคลิกที่ลิงก์เพื่อเปิดกล้องใน iframe
+  document.getElementById('openCameraLink').addEventListener('click', function(event) {
+    event.preventDefault();
+    openCameraInIframe();
+  });
 
-  const qrCodeSuccessCallback = (decodedText) => {
-    html5QrCode.stop()
+  // ฟังก์ชันเพื่อเปิดกล้องใน iframe
+  function openCameraInIframe() {
+    const html5QrCode = new Html5Qrcode(document.getElementById("cameraIframe"));
+    
+    const qrCodeSuccessCallback = (decodedText) => {
+      html5QrCode.stop()
+        .then(() => {
+          console.log("QR code สแกนสำเร็จ:", decodedText);
+      
+          // Open the URL in a new tab
+          window.open(decodedText, "_blank");
+      
+          // Reset iframe content
+          resetIframe();
+        })
+        .catch(err => {
+          console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
+        });
+    };
+  
+    const config = {
+      fps: 10, // Frames per second
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1,
+      facingMode: "environment" // Default to back camera
+    };
+  
+    // เริ่มกล้องใน iframe
+    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
       .then(() => {
-        console.log("QR code สแกนสำเร็จ:", decodedText);
-  
-        // Open the URL in a new tab
-        window.open(decodedText, "_blank");
-  
-        // Restart camera after scanning
-        html5QrCode.start();
+        console.log("กำลังเริ่มต้นการสแกน QR code ใน iframe...");
       })
       .catch(err => {
-        console.error("เกิดข้อผิดพลาดในการหยุดกล้อง:", err);
+        console.error("เกิดข้อผิดพลาดในการเริ่มกล้องใน iframe:", err);
       });
-  };
+  }
 
-  const config = {
-    fps: 10, // Frames per second
-    qrbox: { width: 250, height: 250 },
-    aspectRatio: 1,
-    facingMode: "environment" // Default to back camera
-  };
-
-  html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-    .then(() => {
-      isCameraRunning = true;
-    })
-    .catch(err => {
-      console.error("เกิดข้อผิดพลาดในการเริ่มกล้อง:", err);
-    });
+  // ฟังก์ชันสำหรับรีเซ็ต iframe
+  function resetIframe() {
+    document.getElementById('cameraIframe').src = '';
+  }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
