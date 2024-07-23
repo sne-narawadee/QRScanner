@@ -130,12 +130,25 @@
 
   function isLoggedIn() {
     // Add your authentication logic here
-    // For simplicity, let's assume username and password are hardcoded
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    // Example hardcoded credentials (replace with your actual authentication logic)
-    return username === "admin" && password === "password";
+    // Check against database (Google Sheets in this case)
+    return fetch('https://sheets.googleapis.com/v4/spreadsheets/{1_N0TUGHael9C6LSfTuHvryu4t635Bm5ZjiNdt7bd-fU}/values/Login!A1:B100?key={AIzaSyD1zyXu4ydcj4Cs07JYwyUB_WguSTgd1nc}')
+      .then(response => response.json())
+      .then(data => {
+        // Iterate through data to find matching username and password
+        for (let i = 0; i < data.values.length; i++) {
+          if (data.values[i][0] === username && data.values[i][1] === password) {
+            return true;
+          }
+        }
+        return false;
+      })
+      .catch(error => {
+        console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
+        return false;
+      });
   }
 
   const config = {
