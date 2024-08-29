@@ -1,1 +1,109 @@
 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
+        }
+        #header {
+            text-align: center;
+            padding: 10px;
+        }
+        #image {
+            max-width: 60px; /* ปรับขนาดของรูปภาพที่นี่ */
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        h1 {
+            margin: 0;
+            font-family: 'Open Sans', sans-serif; /* ใช้ฟอนต์ Roboto สำหรับ h1 */
+            font-size: 1.2em; /* ขนาดฟอนต์ */
+            font-weight: 700; /* ความหนาของฟอนต์ */
+            color: #333; /* สีของฟอนต์ */
+        }
+        #video {
+            width: 100%;
+            height: 100%;
+            border: 1px solid black;
+            flex-grow: 1; /* ทำให้ video ใช้พื้นที่ที่เหลือ */
+        }
+        #logoutButton {
+            position: fixed; /* ปักหมุดปุ่มที่ด้านล่างสุด */
+            bottom: 10px; /* ระยะห่างจากด้านล่าง */
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #logoutButton:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img id="image" src="https://raw.githubusercontent.com/sne-narawadee/test_QRScan/main/sneGoldBlockLogo3.png" alt="QR Scanner Image">
+        <h1>SNE QR Scanner</h1>
+    </div>
+    <video id="video" playsinline></video>
+    <button id="logoutButton">Logout</button>
+    <script>
+        const codeReader = new ZXing.BrowserQRCodeReader();
+        const videoElement = document.getElementById('video');
+
+        // Function to start scanning
+        async function startScanning() {
+            try {
+                // Set video constraints for better performance
+                const constraints = {
+                    video: {
+                        facingMode: "environment",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+
+                // Start the QR code scanner with improved constraints
+                await codeReader.decodeFromVideoDevice(null, videoElement, (result, error) => {
+                    if (result) {
+                        console.log('QR code detected:', result.text);
+                        window.location.href = result.text;
+                    }
+                    if (error && !(error instanceof ZXing.NotFoundException)) {
+                        console.error(error);
+                    }
+                });
+
+                // Handle errors
+            } catch (err) {
+                console.error('Error starting QR code scanning:', err);
+            }
+        }
+
+        window.onload = startScanning;
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            window.open('https://www.google.com', '_blank');
+            setTimeout(() => {
+                window.close(); // ปิดหน้าต่างปัจจุบัน
+            }, 500);
+        });
+    </script>
+</body>
+</html>
