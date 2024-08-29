@@ -1,12 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <!-- Sets the character encoding to UTF-8 for supporting various characters -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ensures the page scales correctly on different devices -->
     <title>QR Code Scanner</title>
+    <!-- Sets the title of the page displayed in the browser tab -->
     <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <!-- Links to the ZXing library for QR code scanning functionality -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+    <!-- Links to Google Fonts for custom fonts (Roboto and Open Sans) -->
     <style>
         body {
             display: flex;
@@ -14,33 +18,36 @@
             min-height: 100vh;
             margin: 0;
             font-family: 'Open Sans', sans-serif;
+            /* Applies 'Open Sans' font to the entire page */
         }
         #header {
             text-align: center;
             padding: 10px;
+            /* Centers the content of the header and adds padding */
         }
         #image {
-            max-width: 60px; /* ปรับขนาดของรูปภาพที่นี่ */
+            max-width: 60px; /* Adjusts the image size */
             height: auto;
             display: block;
             margin: 0 auto;
+            /* Centers the image and ensures it scales correctly */
         }
         h1 {
             margin: 0;
-            font-family: 'Open Sans', sans-serif; /* ใช้ฟอนต์ Roboto สำหรับ h1 */
-            font-size: 1.2em; /* ขนาดฟอนต์ */
-            font-weight: 700; /* ความหนาของฟอนต์ */
-            color: #333; /* สีของฟอนต์ */
+            font-family: 'Open Sans', sans-serif; /* Uses 'Open Sans' font for <h1> */
+            font-size: 1.2em; /* Sets the font size for <h1> */
+            font-weight: 700; /* Makes the font bold */
+            color: #333; /* Sets the color of the text */
         }
         #video {
             width: 100%;
             height: 100%;
             border: 1px solid black;
-            flex-grow: 1; /* ทำให้ video ใช้พื้นที่ที่เหลือ */
+            flex-grow: 1; /* Allows the video element to expand and fill available space */
         }
         #logoutButton {
-            position: fixed; /* ปักหมุดปุ่มที่ด้านล่างสุด */
-            bottom: 10px; /* ระยะห่างจากด้านล่าง */
+            position: fixed; /* Fixes the button at the bottom of the page */
+            bottom: 10px; /* Sets the distance from the bottom */
             left: 50%;
             transform: translateX(-50%);
             padding: 10px 20px;
@@ -50,24 +57,36 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            /* Styles the logout button and centers it horizontally */
         }
         #logoutButton:hover {
             background-color: darkred;
+            /* Changes button color on hover */
         }
     </style>
 </head>
 <body>
     <div id="header">
-        <img id="image" src="https://raw.githubusercontent.com/sne-narawadee/test_QRScan/main/sneGoldBlockLogo3.png" alt="QR Scanner Image">
+        <!-- Header section containing the image and title -->
+        <!-- Image Setting :
+        <img id="image" src="https://raw.githubusercontent.com/sne-narawadee/QRScanner/main/+file img uploaded+" alt="QR Scanner Image">
+        -->
+        <img id="image" src="https://raw.githubusercontent.com/sne-narawadee/QRScanner/main/sneGoldBlockLogo3.png" alt="QR Scanner Image">
+        <!-- Displays the logo image -->
         <h1>SNE QR Scanner</h1>
+        <!-- Displays the title of the page -->
     </div>
     <video id="video" playsinline></video>
+    <!-- Video element for displaying the camera feed -->
     <button id="logoutButton">Logout</button>
+    <!-- Button to log out -->
     <script>
         const codeReader = new ZXing.BrowserQRCodeReader();
+        // Creates a new instance of the QR code reader from ZXing library
         const videoElement = document.getElementById('video');
+        // Gets the video element to display the camera feed
 
-        // Function to start scanning
+        // Function to start scanning QR codes
         async function startScanning() {
             try {
                 // Set video constraints for better performance
@@ -79,29 +98,34 @@
                     }
                 };
 
-                // Start the QR code scanner with improved constraints
+                // Start the QR code scanner with the specified video constraints
                 await codeReader.decodeFromVideoDevice(null, videoElement, (result, error) => {
                     if (result) {
                         console.log('QR code detected:', result.text);
+                        // Logs the QR code result to the console and redirects to the URL
                         window.location.href = result.text;
                     }
                     if (error && !(error instanceof ZXing.NotFoundException)) {
                         console.error(error);
+                        // Logs any errors except if the QR code is not found
                     }
                 });
 
                 // Handle errors
             } catch (err) {
                 console.error('Error starting QR code scanning:', err);
+                // Logs any errors that occur while starting the scanning process
             }
         }
 
         window.onload = startScanning;
+        // Starts the scanning function when the page loads
 
         document.getElementById('logoutButton').addEventListener('click', () => {
             window.open('https://www.google.com', '_blank');
+            // Opens Google in a new tab
             setTimeout(() => {
-                window.close(); // ปิดหน้าต่างปัจจุบัน
+                window.close(); // Closes the current window after a short delay
             }, 500);
         });
     </script>
